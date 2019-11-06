@@ -1,0 +1,89 @@
+Sub MarketData1():
+
+'Have this run on each sheet in the woorkbook
+For Each ws In Worksheets
+
+    'Label each colum with correct title
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    
+    'Set all variables at the start
+    Dim Volume As Double
+    Volume = 0
+    Dim ticker As String
+    Dim Yearly_Open As Double
+    Dim Yearly_Close As Double
+    Dim Opening_Cell As Long
+    Opening_Cell = 2
+    Dim Price_Change As Double
+    Dim Percent_Change As Double
+    Dim i As Long
+    
+    
+    
+    'Determine last row of column
+    Dim lastrow As Long
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'Keep tack of which Ticker we are counting
+    Dim Ticker_Change As Integer
+    Ticker_Change = 2
+    
+    'Loop through all cells in a given worksheet
+    For i = 2 To lastrow
+    
+        'Check to see if the Ticker has changed
+        If ws.Range("A" & i + 1).Value = ws.Range("A" & i).Value Then
+        
+            'Add up the total trading volume of that stock
+            Volume = Volume + ws.Range("G" & i).Value
+                    
+        Else
+            
+            'Set the Ticker Symbol
+            ticker = ws.Range("A" & i).Value
+                       
+            'Set Yearly Closing Price
+            Yearly_Close = ws.Range("F" & i)
+            
+            'Set Yearly Opening Price
+            Yearly_Open = ws.Range("C" & Opening_Cell)
+            
+            'Set yearly change in price
+            Price_Change = Yearly_Close - Yearly_Open
+                
+             'Add conditional so no error when diving by zero
+                If Yearly_Open = 0 Then
+                    Percent_Change = 0
+                Else
+                    Percent_Change = Price_Change / Yearly_Open
+                End If
+                
+            
+            'Print in summary table
+            ws.Range("I" & Ticker_Change).Value = ticker
+            ws.Range("J" & Ticker_Change).Value = Price_Change
+            ws.Range("K" & Ticker_Change).Value = Percent_Change
+            ws.Range("K" & Ticker_Change).NumberFormat = "0.00%"
+            ws.Range("L" & Ticker_Change).Value = Volume + ws.Range("G" & i).Value
+                
+                'Conditional Formating Yearly Change, Positive Green/ Negative Red
+         If ws.Range("J" & Ticker_Change).Value > 0 Then
+            ws.Range("J" & Ticker_Change).Interior.ColorIndex = 4
+         Else
+            ws.Range("J" & Ticker_Change).Interior.ColorIndex = 3
+         End If
+            
+            'Reset values for when ticker changes
+            Ticker_Change = Ticker_Change + 1
+            Volume = 0
+            Opening_Cell = i + 1
+            
+        End If
+        
+    Next i
+Next ws
+End Sub
+
